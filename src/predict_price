@@ -1,0 +1,101 @@
+import joblib
+import pandas as pd
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+# Load trained model and preprocessors
+model = joblib.load("models/trained_model.pkl")
+ohe = joblib.load("models/ohe.pkl")
+scaler = joblib.load("models/scaler.pkl")
+
+# Define categorical and numerical features
+categorical_features = ['mainroad', 'guestroom', 'basement', 'hotwaterheating', 
+                        'airconditioning', 'prefarea', 'furnishingstatus']
+numerical_features = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking']
+
+def preprocess_input(df_input):
+    """Applies encoding and scaling to user input."""
+    cat_transformed = pd.DataFrame(ohe.transform(df_input[categorical_features]))
+    cat_transformed.columns = ohe.get_feature_names_out(categorical_features)
+
+    df_input[numerical_features] = scaler.transform(df_input[numerical_features])
+
+    df_processed = pd.concat([df_input[numerical_features], cat_transformed], axis=1)
+    return df_processed
+
+def predict_price_gui():
+    try:
+        input_data = {
+            'area': float(entries['area'].get()),
+            'bedrooms': int(entries['bedrooms'].get()),
+            'bathrooms': int(entries['bathrooms'].get()),
+            'stories': int(entries['stories'].get()),
+            'parking': int(entries['parking'].get()),
+            'mainroad': var_mainroad.get(),
+            'guestroom': var_guestroom.get(),
+            'basement': var_basement.get(),
+            'hotwaterheating': var_hotwaterheating.get(),
+            'airconditioning': var_airconditioning.get(),
+            'prefarea': var_prefarea.get(),
+            'furnishingstatus': var_furnishingstatus.get()
+        }
+        df_input = pd.DataFrame([input_data])
+        df_processed = preprocess_input(df_input)
+        predicted_price = model.predict(df_processed)[0]
+        result_label.config(text=f"Predicted House Price: ${predicted_price:,.2f}")
+    except Exception as e:
+        messagebox.showerror("Input Error", f"Please check your inputs.\n\nError: {str(e)}")
+
+# Tkinter GUI
+root = tk.Tk()
+root.title("House Price Predictor")
+
+frame = ttk.Frame(root, padding=20)
+frame.grid(row=0, column=0)
+
+# Input fields
+entries = {}
+for idx, feature in enumerate(numerical_features):
+    ttk.Label(frame, text=feature.capitalize()).grid(row=idx, column=0, sticky=tk.W, pady=2)
+    entry = ttk.Entry(frame)
+    entry.grid(row=idx, column=1)
+    entries[feature] = entry
+
+# Categorical inputs as dropdowns
+def create_dropdown(label, row, variable, options):
+    ttk.Label(frame, text=label).grid(row=row, column=0, sticky=tk.W, pady=2)
+    dropdown = ttk.Combobox(frame, textvariable=variable, values=options, state='readonly')
+    dropdown.grid(row=row, column=1)
+    dropdown.current(0)
+
+var_mainroad = tk.StringVar()
+var_guestroom = tk.StringVar()
+var_basement = tk.StringVar()
+var_hotwaterheating = tk.StringVar()
+var_airconditioning = tk.StringVar()
+var_prefarea = tk.StringVar()
+var_furnishingstatus = tk.StringVar()
+
+dropdown_vars = [
+    ("Main Road", var_mainroad, ['yes', 'no']),
+    ("Guest Room", var_guestroom, ['yes', 'no']),
+    ("Basement", var_basement, ['yes', 'no']),
+    ("Hot Water Heating", var_hotwaterheating, ['yes', 'no']),
+    ("Air Conditioning", var_airconditioning, ['yes', 'no']),
+    ("Preferred Area", var_prefarea, ['yes', 'no']),
+    ("Furnishing Status", var_furnishingstatus, ['furnished', 'semi-furnished', 'unfurnished']),
+]
+
+for i, (label, var, opts) in enumerate(dropdown_vars):
+    create_dropdown(label, len(numerical_features) + i, var, opts)
+
+# Predict button
+ttk.Button(frame, text="Predict Price", command=predict_price_gui).grid(
+    row=len(numerical_features) + len(dropdown_vars), columnspan=2, pady=10
+)
+
+# Result label
+result_label = ttk.Label(frame, text="Predicted House Price: $0.00", foreground='blue', font=('Helvetica', 12, 'bold'))
+result_label.grid(row=len(numerical_features) + len(dropdown_vars) + 1, columnspan=2, pady=10)
+
+root.mainloop()
