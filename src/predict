@@ -1,0 +1,54 @@
+import joblib
+import pandas as pd
+
+# Load trained model and preprocessors
+model = joblib.load("models/trained_model.pkl")
+ohe = joblib.load("models/ohe.pkl")
+scaler = joblib.load("models/scaler.pkl")
+
+# Define categorical and numerical features
+categorical_features = ['mainroad', 'guestroom', 'basement', 'hotwaterheating', 
+                        'airconditioning', 'prefarea', 'furnishingstatus']
+numerical_features = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking']
+
+def get_user_input():
+    """Takes user input for prediction and returns a DataFrame."""
+    input_data = {
+        'area': float(input("Enter area (sq ft): ")),
+        'bedrooms': int(input("Enter number of bedrooms: ")),
+        'bathrooms': int(input("Enter number of bathrooms: ")),
+        'stories': int(input("Enter number of stories: ")),
+        'parking': int(input("Enter number of parking spaces: ")),
+        'mainroad': input("Is there a main road access? (yes/no): "),
+        'guestroom': input("Is there a guest room? (yes/no): "),
+        'basement': input("Is there a basement? (yes/no): "),
+        'hotwaterheating': input("Is there hot water heating? (yes/no): "),
+        'airconditioning': input("Is there air conditioning? (yes/no): "),
+        'prefarea': input("Is it in a preferred area? (yes/no): "),
+        'furnishingstatus': input("Enter furnishing status (furnished/semi-furnished/unfurnished): ")
+    }
+    return pd.DataFrame([input_data])
+
+def preprocess_input(df_input):
+    """Applies encoding and scaling to user input."""
+    # Encode categorical variables
+    cat_transformed = pd.DataFrame(ohe.transform(df_input[categorical_features]))
+    cat_transformed.columns = ohe.get_feature_names_out(categorical_features)
+
+    # Scale numerical variables
+    df_input[numerical_features] = scaler.transform(df_input[numerical_features])
+
+    # Combine processed features
+    df_processed = pd.concat([df_input[numerical_features], cat_transformed], axis=1)
+    
+    return df_processed
+
+def predict_price():
+    """Predicts house price based on user input."""
+    df_input = get_user_input()
+    df_processed = preprocess_input(df_input)
+    predicted_price = model.predict(df_processed)[0]
+    print(f"\nPredicted House Price: ${predicted_price:,.2f}")
+
+if __name__ == "__main__":
+    predict_price()
