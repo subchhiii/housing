@@ -1,2 +1,15 @@
-# housing
-An AI model for predicting house prices using machine learning regression techniques. By analyzing historical real estate data, the model identifies key factors such as area, number of bedrooms, number of stories, parking availability, and other property features to estimate market values. Performance evaluation is based on kurtosis, standard deviation, and mean, providing insights into price distribution and variability. Results show improved predictions over traditional methods, making it a valuable tool for real estate professionals and buyers. The report also discusses challenges like data preprocessing and feature selection, along with potential enhancements for greater accuracy.
+# House Price Predictor
+
+This project uses a machine learning model (Random Forest Regressor) to predict house prices based on user input.
+
+## Features
+- Preprocessing using OneHotEncoder and StandardScaler
+- Model training and evaluation
+- CLI-based prediction
+- GUI version available (Tkinter-based)
+
+## Setup
+
+pip install -r requirements.txt
+python train_model.py
+python predict.py
