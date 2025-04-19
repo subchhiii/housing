@@ -1,0 +1,34 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+df=pd.read_csv('Housing (1).csv')
+print(df)
+# Calculate kurtosis for numeric columns
+kurt_values = df[['price', 'area', 'bedrooms', 'bathrooms', 'stories', 'parking']].kurtosis()
+# Print kurtosis values
+print("Kurtosis for each numeric column:")
+print(kurt_values)
+# Compute standard deviation for numerical columns only
+std_dev_values = df.std(numeric_only=True)
+# Print the standard deviation of each numerical feature
+print(std_dev_values)
+numeric_data = df.select_dtypes(include='number')
+Q1 = numeric_data.quantile(0.25)
+Q3 = numeric_data.quantile(0.75)
+IQR = Q3 - Q1
+outliers = ((numeric_data < (Q1 - 1.5 * IQR)) | (numeric_data > (Q3 + 1.5 * IQR)))
+outlier_rows = df[outliers.any(axis=1)]
+print(outlier_rows)
+# Compute variance for numerical columns only
+variance_values = df.var(numeric_only=True)
+# Print the variance of each numerical feature
+print(variance_values)
+# Load and select numeric columns
+df = pd.read_csv("Housing (1).csv")
+corr_matrix = df.corr(numeric_only=True)
+# Create the heatmap
+plt.figure(figsize=(10, 8))  # Set figure size
+sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
+# Show the heatmap
+plt.title("Feature Correlation Heatmap")
+plt.show()

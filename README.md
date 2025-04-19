@@ -1,2 +1,2 @@
 # housing
-predicting house prices with local factors
+An AI model for predicting house prices using machine learning regression techniques. By analyzing historical real estate data, the model identifies key factors such as area, number of bedrooms, number of stories, parking availability, and other property features to estimate market values. Performance evaluation is based on kurtosis, standard deviation, and mean, providing insights into price distribution and variability. Results show improved predictions over traditional methods, making it a valuable tool for real estate professionals and buyers. The report also discusses challenges like data preprocessing and feature selection, along with potential enhancements for greater accuracy.
